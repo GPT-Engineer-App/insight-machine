@@ -1,0 +1,82 @@
+import React, { useState } from "react";
+import { Box, Button, Container, FormControl, FormLabel, Input, Stack, useToast } from "@chakra-ui/react";
+import { FaSignInAlt } from "react-icons/fa";
+
+const Index = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const toast = useToast();
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await fetch("https://backengine-uwlt.fly.dev/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem("accessToken", data.accessToken);
+        setIsLoggedIn(true);
+        toast({
+          title: "Login Successful",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+      } else {
+        toast({
+          title: "Login Failed",
+          description: "Invalid email or password",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "An error occurred",
+        description: error.message,
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
+  return (
+    <Container centerContent>
+      <Stack spacing={4} width="100%" maxW={"md"} p={5} boxShadow={"lg"}>
+        {!isLoggedIn ? (
+          <form onSubmit={handleLogin}>
+            <FormControl isRequired>
+              <FormLabel>Email</FormLabel>
+              <Input type="email" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            </FormControl>
+            <FormControl isRequired mt={4}>
+              <FormLabel>Password</FormLabel>
+              <Input type="password" placeholder="Enter your password" value={password} onChange={(e) => setPassword(e.target.value)} />
+            </FormControl>
+            <Button leftIcon={<FaSignInAlt />} colorScheme="teal" mt={4} type="submit">
+              Login
+            </Button>
+          </form>
+        ) : (
+          <Box>
+            <Button colorScheme="green" onClick={() => {}}>
+              Health Check
+            </Button>
+          </Box>
+        )}
+      </Stack>
+    </Container>
+  );
+};
+
+export default Index;
